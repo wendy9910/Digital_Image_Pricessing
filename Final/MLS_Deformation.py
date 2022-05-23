@@ -1,7 +1,7 @@
 import numpy as np
 import cv2     
 
-def eye_deformation(landmarks,img,state):
+def eye_deformation(landmarks,img,state,enlarge_value):
     
     global Leyepts2,Reyepts2,eyeDispts2,LReyePos2,LReyePos1
     
@@ -28,14 +28,14 @@ def eye_deformation(landmarks,img,state):
     
     
     if(state==1):
-        Leyepts2 = eye_deformation_enlarge_Pos(Leyepts1,LeyePosCenter)    
-        Reyepts2 = eye_deformation_enlarge_Pos(Reyepts1,ReyePosCenter)
+        Leyepts2 = eye_deformation_enlarge_Pos(Leyepts1,LeyePosCenter,enlarge_value)    
+        Reyepts2 = eye_deformation_enlarge_Pos(Reyepts1,ReyePosCenter,enlarge_value)
     elif(state==2):
-        Leyepts2 = eye_deformation_high_Pos(Leyepts1,LeyePosCenter)    
-        Reyepts2 = eye_deformation_high_Pos(Reyepts1,ReyePosCenter)
+        Leyepts2 = eye_deformation_high_Pos(Leyepts1,LeyePosCenter,enlarge_value)    
+        Reyepts2 = eye_deformation_high_Pos(Reyepts1,ReyePosCenter,enlarge_value)
     elif(state==3):
-        Leyepts2 = eye_deformation_distance_Pos(Leyepts1,-1)  
-        Reyepts2 = eye_deformation_distance_Pos(Reyepts1,1)
+        Leyepts2 = eye_deformation_distance_Pos(Leyepts1,-1,enlarge_value)  
+        Reyepts2 = eye_deformation_distance_Pos(Reyepts1,1,enlarge_value)
 
     if(state==3):
         eyeDispts2 = faceDispts1.copy()
@@ -64,7 +64,7 @@ def eye_deformation(landmarks,img,state):
     return img3
 
 #調整頂點位置放大縮小
-def eye_deformation_enlarge_Pos(pos1,c):
+def eye_deformation_enlarge_Pos(pos1,c,enlarge_value):
     print(c)
     a = np.empty(shape=(0, 2))
     #位移方向
@@ -81,7 +81,7 @@ def eye_deformation_enlarge_Pos(pos1,c):
     return p1
 
 #調整頂點位置 眼高
-def eye_deformation_high_Pos(pos1,c):
+def eye_deformation_high_Pos(pos1,c,enlarge_value):
     a = np.empty(shape=(0, 2))
     for idx, point in enumerate(pos1):
         vec1 = np.int32([pos1[idx]-c])   
@@ -99,7 +99,7 @@ def eye_deformation_high_Pos(pos1,c):
         p1 = np.uint32(p1)
     return p1
 
-def eye_deformation_distance_Pos(pos1,d):
+def eye_deformation_distance_Pos(pos1,d,enlarge_value):
     dic = np.array([1,0])
     p1 = np.empty(shape=(0, 2))
     #加移動向量
