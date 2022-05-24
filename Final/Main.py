@@ -65,44 +65,22 @@ def rection(img): # OpenCV 測68個點
         
     return img,landmarks
 
-#
-def get_valueE1(value):
-    try:
-        enlarge_value = eyescale1.get()
-        img,landmarks = rection(imgS)
-        img = eye_deformation(landmarks,imgS,1,enlarge_value)
-        Renew(img)
-    except:
-        print('請選擇照片')
-
-def get_valueE2(value):
-    try:
-        enlarge_value = eyescale2.get()
-        img,landmarks = rection(imgS)
-        print("hi")
-        img = eye_deformation(landmarks,imgS,2,enlarge_value)
-        Renew(img)
-    except:
-        print('請選擇照片')
     
-def get_valueE3(value):
+def get_value(event,num):
+    global enlarge_value
     try:
-        enlarge_value = eyescale3.get()
+        if(num==1):
+            enlarge_value = eyescale1.get()
+        elif(num==2):
+            enlarge_value = eyescale2.get()
+        elif(num==3):
+            enlarge_value = eyescale3.get()
         img,landmarks = rection(imgS)
-        img = eye_deformation(landmarks,imgS,3,enlarge_value)
+        img = eye_deformation(landmarks,imgS,num,enlarge_value)
         Renew(img)
     except:
         print('請選擇照片')
 
-"""
-class Scale(tk.Scale):
-    def __init__(self, master=None, **kwargs):
-        tk.Scale.__init__(self, master, **kwargs)
-        self.bind('<Button-1>', self.set_value)
-
-    def set_value(self, event):
-        self.event_generate('<Button-3>', x=event.x, y=event.y)
-"""     
 
 global imgS,img_show,panel
 
@@ -138,17 +116,19 @@ font = ('Courier New', 20, 'bold')
 eyescale1 = tk.Scale(
     block2, label='大小', from_=-10, to=10, orient="horizontal"
     ,tickinterval=10,length=280)
-eyescale1.bind("<ButtonRelease-1>", get_valueE1)
+eyescale1.bind('<ButtonRelease-1>', lambda event: get_value(event, 1)) 
 
 eyescale2 = tk.Scale(
     block2, label='眼糕', from_=-10, to=10, orient="horizontal"
     ,tickinterval=10,length=280)
-eyescale2.bind("<ButtonRelease-1>", get_valueE2)
+eyescale2.bind('<ButtonRelease-1>', lambda event: get_value(event, 2)) 
 
 eyescale3 = tk.Scale(
     block2, label='眼距', from_=-10, to=10, orient="horizontal"
     ,tickinterval=10,length=280)
-eyescale3.bind("<ButtonRelease-1>", get_valueE3)
+#eyescale3.bind("<ButtonRelease-1>", lambda: get_valueE3(3))
+#eyescale3.bind('<ButtonRelease-1>', get_valueE3(event_args, num=3))  # 右键双击
+eyescale3.bind('<ButtonRelease-1>', lambda event: get_value(event, 3)) 
 
 eyelabel.grid(row=0, column=0)
 eyescale1.grid(row=1, column=0)
