@@ -15,11 +15,11 @@ from MLS_Deformation import *
 def OpenCV_small():  # opencv 等比縮小圖片
     global imgS    
     nr,nc = imgS.shape[:2]
-    if nr >= 670 or nc >= 670:
+    if nr >= 800 or nc >= 800:
         if nr>= nc:
-            scale = 670/nr 
+            scale = 800/nr 
         else:
-            scale = 670/nc
+            scale = 800/nc
         nr2 = int(nr * scale)
         nc2 = int(nc * scale)
         imgS = cv2.resize(imgS,(nc2,nr2),interpolation = cv2.INTER_LINEAR)
@@ -31,7 +31,7 @@ def open_file():
     OpenCV_small() # opencv 等比縮小圖片
     
     # Label改成Canvas，不要用Label因為會有覆寫問題
-    panel = tk.Canvas(block1,width=650,height=600,bg='#FFFFFF') # 設定長寬   
+    panel = tk.Canvas(block1,width=650,height=800,bg='#FFFFFF') # 設定長寬   
     imgS,landmarks = rection(imgS)  # imgS是rection後的opencv圖    
     Renew(imgS) # 更新
     
@@ -75,6 +75,8 @@ def get_value(event,num):
             enlarge_value = eyescale2.get()
         elif(num==3):
             enlarge_value = eyescale3.get()
+        elif(num==4):
+            enlarge_value = facescale1.get()
         img,landmarks = rection(imgS)
         img = eye_deformation(landmarks,imgS,num,enlarge_value)
         Renew(img)
@@ -87,7 +89,7 @@ global imgS,img_show,panel
    
 window = tk.Tk()
 window.title('人臉五官微調系統')
-window.geometry('960x700')
+window.geometry('960x800')
 
 div_size = 300
 align_mode = 'nswe'
@@ -97,17 +99,19 @@ pad = 5
 #GUI整體布局
 blocktop = tk.Frame(window, width=650, height=30)
 blocktop2 = tk.Frame(window, width=div_size, height=30)
-block1 = tk.Frame(window, width=650, height=600,bg='#FFFFFF')
+block1 = tk.Frame(window, width=650, height=800,bg='#FFFFFF')
 block2 = tk.Frame(window, width=div_size, height=250)
 block3 = tk.Frame(window, width=div_size, height=250)
 block4 = tk.Frame(window, width=div_size, height=250)
+block5 = tk.Frame(window, width=div_size, height=250)
 
 blocktop.grid(column=0, row=0, sticky=align_mode)
 blocktop2.grid(column=1, row=0, sticky=align_mode)
-block1.grid(column=0, row=1, rowspan=4, sticky=align_mode) 
+block1.grid(column=0, row=1, rowspan=5, sticky=align_mode) 
 block2.grid(column=1, row=2, sticky=align_mode)
 block3.grid(column=1, row=3, sticky=align_mode)
 block4.grid(column=1, row=4, sticky=align_mode)
+block5.grid(column=1, row=5, sticky=align_mode)
 
 
 #拉霸區塊布局
@@ -155,6 +159,14 @@ mouselabel.grid(row=0, column=0)
 mousescale1.grid(row=1, column=0)
 mousescale2.grid(row=2, column=0)
 
+facelabel = tk.Label(block5,text="臉型",font=('新細明體', 12),padx=pad, pady=pad,fg='#007799')
+font = ('Courier New', 20, 'bold')
+facescale1 = tk.Scale(
+    block5, label='瘦臉', from_=-10, to=10, orient="horizontal",tickinterval=10,length=280)
+
+facelabel.grid(row=0, column=0)
+facescale1.grid(row=1, column=0)
+facescale1.bind('<ButtonRelease-1>', lambda event: get_value(event, 4)) 
 
 #開檔&存檔
 import_btn = tk.Button(blocktop, text='開啟檔案', bg='#BBFFEE', fg='black',height = 1, 

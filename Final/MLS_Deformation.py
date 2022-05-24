@@ -7,6 +7,7 @@ def eye_deformation(landmarks,img,state,enlarge_value):
     
     LeyePosCenter = np.uint32([(landmarks[36,0]+landmarks[39,0])/2,(landmarks[36,1]+landmarks[39,1])/2])
     ReyePosCenter = np.uint32([(landmarks[42,0]+landmarks[45,0])/2,(landmarks[42,1]+landmarks[45,1])/2])
+    facePosCenter = np.uint32([landmarks[30,0]+landmarks[30,1]])
     
     Leyepts1 = np.uint32([[landmarks[36,0],landmarks[36,1]],[landmarks[37,0],landmarks[37,1]]
                        ,[landmarks[38,0],landmarks[38,1]],[landmarks[39,0],landmarks[39,1]]
@@ -19,7 +20,8 @@ def eye_deformation(landmarks,img,state,enlarge_value):
                        ,[(landmarks[42,0]+landmarks[45,0])/2,(landmarks[42,1]+landmarks[45,1])/2]])
     
     faceDispts1 = np.uint32([[landmarks[0,0],landmarks[0,1]],[landmarks[4,0],landmarks[4,1]]
-                        ,[landmarks[8,0],landmarks[8,1]],[landmarks[12,0],landmarks[12,1]]
+                        ,[landmarks[6,0],landmarks[6,1]],[landmarks[8,0],landmarks[8,1]]
+                        ,[landmarks[10,0],landmarks[10,1]],[landmarks[12,0],landmarks[12,1]]
                         ,[landmarks[16,0],landmarks[16,1]]])
     
     eyeDispts1 = faceDispts1.copy()
@@ -36,13 +38,19 @@ def eye_deformation(landmarks,img,state,enlarge_value):
     elif(state==3):
         Leyepts2 = eye_deformation_distance_Pos(Leyepts1,-1,enlarge_value)  
         Reyepts2 = eye_deformation_distance_Pos(Reyepts1,1,enlarge_value)
-
+    elif(state==4):
+        faceDispts2 = Face_deformation_pos(faceDispts1,facePosCenter,enlarge_value)  
+        
+        
     if(state==3):
         eyeDispts2 = faceDispts1.copy()
         eyeDispts2 = np.append(eyeDispts2,Leyepts2,axis=0)
         eyeDispts2 = np.append(eyeDispts2,Reyepts2,axis=0)
         initial = trans(img, eyeDispts1)
         img3 = initial.deformation(img, eyeDispts2)
+    elif(state==4):
+        initial = trans(img, faceDispts1)
+        img3 = initial.deformation(img, faceDispts2)
     else:
         LReyePos1 = Leyepts1.copy()
         LReyePos1 = np.append(LReyePos1,Reyepts1,axis=0)
@@ -106,6 +114,28 @@ def eye_deformation_distance_Pos(pos1,d,enlarge_value):
     for idx, point in enumerate(pos1):
         pos = np.uint32([pos1[idx]+ dic * enlarge_value * d])
         p1 = np.append(p1,pos,axis=0)
+        p1 = np.uint32(p1)
+    return p1
+
+def Face_deformation_pos(pos1,c,enlarge_value):
+    dic2 = np.array([-1,1])
+    a = np.empty(shape=(0, 2))
+    for idx, point in enumerate(pos1):
+        vec1 = np.int32([pos1[idx]-c])   
+        a = np.append(a,vec1,axis=0)
+    dic = normalization(a)
+    p1 = np.empty(shape=(0, 2))
+    #加移動向量
+    for idx, point in enumerate(pos1):
+        if(idx>3 and idx!=6):
+            pos = np.uint32([pos1[idx]+dic[idx]*enlarge_value*dic2])
+            p1 = np.append(p1,pos,axis=0)
+        elif(idx>0 and idx!=6 and idx!=3):
+            pos = np.uint32([pos1[idx]+dic[idx]*enlarge_value])
+            p1 = np.append(p1,pos,axis=0)
+        else:
+            pos = np.uint32([pos1[idx]])
+            p1 = np.append(p1,pos,axis=0)
         p1 = np.uint32(p1)
     return p1
 
