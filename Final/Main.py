@@ -67,7 +67,7 @@ def rection(img): # OpenCV 測68個點
 
     
 def get_value(event,num):
-    global enlarge_value
+    global enlarge_value,imgS
     try:
         if(num==1):
             enlarge_value = eyescale1.get()
@@ -78,8 +78,8 @@ def get_value(event,num):
         elif(num==4):
             enlarge_value = facescale1.get()
         img,landmarks = rection(imgS)
-        img = eye_deformation(landmarks,imgS,num,enlarge_value)
-        Renew(img)
+        imgS = eye_deformation(landmarks,imgS,num,enlarge_value)
+        Renew(imgS)
     except:
         print('請選擇照片')
 
@@ -119,17 +119,17 @@ eyelabel = tk.Label(block2,text="眼睛",font=('新細明體', 12),padx=pad, pad
 font = ('Courier New', 20, 'bold')
 eyescale1 = tk.Scale(
     block2, label='大小', from_=-10, to=10, orient="horizontal"
-    ,tickinterval=10,length=280)
+    ,tickinterval=5,length=280)
 eyescale1.bind('<ButtonRelease-1>', lambda event: get_value(event, 1)) 
 
 eyescale2 = tk.Scale(
     block2, label='眼糕', from_=-10, to=10, orient="horizontal"
-    ,tickinterval=10,length=280)
+    ,tickinterval=5,length=280)
 eyescale2.bind('<ButtonRelease-1>', lambda event: get_value(event, 2)) 
 
 eyescale3 = tk.Scale(
     block2, label='眼距', from_=-10, to=10, orient="horizontal"
-    ,tickinterval=10,length=280)
+    ,tickinterval=5,length=280)
 #eyescale3.bind("<ButtonRelease-1>", lambda: get_valueE3(3))
 #eyescale3.bind('<ButtonRelease-1>', get_valueE3(event_args, num=3))  # 右键双击
 eyescale3.bind('<ButtonRelease-1>', lambda event: get_value(event, 3)) 
@@ -162,7 +162,7 @@ mousescale2.grid(row=2, column=0)
 facelabel = tk.Label(block5,text="臉型",font=('新細明體', 12),padx=pad, pady=pad,fg='#007799')
 font = ('Courier New', 20, 'bold')
 facescale1 = tk.Scale(
-    block5, label='瘦臉', from_=-10, to=10, orient="horizontal",tickinterval=10,length=280)
+    block5, label='瘦臉', from_=-15, to=15, orient="horizontal",tickinterval=5,length=280)
 
 facelabel.grid(row=0, column=0)
 facescale1.grid(row=1, column=0)
