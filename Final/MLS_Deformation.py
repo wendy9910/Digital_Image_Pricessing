@@ -72,23 +72,21 @@ def eye_deformation(landmarks,img,state,enlarge_value):
     return img3
 
 #調整頂點位置放大縮小
+
 def eye_deformation_enlarge_Pos(pos1,c,enlarge_value):
-    print(c)
+    p1 = np.empty(shape=(0, 2)) 
     a = np.empty(shape=(0, 2))
     #位移方向
     for idx, point in enumerate(pos1):
-        vec1 = np.int32([pos1[idx]-c])   
+        vec1 = np.int32([pos1[idx]-c])
         a = np.append(a,vec1,axis=0)
-    dic = normalization(a)
-    #加移動向量
-    p1 = np.empty(shape=(0, 2))
-    for idx, point in enumerate(pos1):
-        pos = np.uint32([pos1[idx]+dic[idx]*enlarge_value])
-        p1 = np.append(p1,pos,axis=0)
-    p1 = np.uint32(p1)
+        dic = normalization(a)
+    p1 = pos1 + dic * enlarge_value
+    p1 = np.uint32(p1)   
     return p1
 
 #調整頂點位置 眼高
+
 def eye_deformation_high_Pos(pos1,c,enlarge_value):
     a = np.empty(shape=(0, 2))
     for idx, point in enumerate(pos1):

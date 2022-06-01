@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
+from tkinter.filedialog import asksaveasfile
 from tkinter import *
 from tkinter import ttk
 from PIL import Image, ImageTk
@@ -35,11 +36,20 @@ def open_file():
     imgS,landmarks = rection(imgS)  # imgS是rection後的opencv圖    
     Renew(imgS) # 更新
     
+def save_file():
+    global new_img,img_show
+    file = filedialog.asksaveasfile(mode='w', defaultextension=".png", filetypes=(("PNG file", "*.png"),("All Files", "*.*") ))
+    if file:
+        abs_path = os.path.abspath(file.name)
+        out = Image.alpha_composite(img_show, txt)
+        out.save(abs_path)
+    
 
 def Renew(im):
     # 把img_show變成PIL格式圖
-    global imgS,img_show,panel
+    global imgS,img_show,panel,new_img
     img_show = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+    new_img = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     img_show = Image.fromarray(img_show)
     img_show = ImageTk.PhotoImage(image = img_show)
     # 要更新
@@ -65,26 +75,44 @@ def rection(img): # OpenCV 測68個點
         
     return img,landmarks
 
+global enlarge_value0
     
 def get_value(event,num):
-    global enlarge_value,imgS
-    try:
-        if(num==1):
-            enlarge_value = eyescale1.get()
-        elif(num==2):
-            enlarge_value = eyescale2.get()
-        elif(num==3):
-            enlarge_value = eyescale3.get()
-        elif(num==4):
-            enlarge_value = facescale1.get()
-        img,landmarks = rection(imgS)
-        imgS = eye_deformation(landmarks,imgS,num,enlarge_value)
-        Renew(imgS)
-    except:
-        print('請選擇照片')
+    global enlarge_value,imgS,enlarge_value0
+#try:
+    if(num==1):
+        enlarge_value = eyescale1.get() - enlarge_value0
+        print(enlarge_value)
+    elif(num==2):
+        enlarge_value = eyescale2.get() - enlarge_value0
+        print(enlarge_value)
+    elif(num==3):
+        enlarge_value = eyescale3.get() - enlarge_value0
+        print(enlarge_value)
+    elif(num==4):
+        enlarge_value = facescale1.get() - enlarge_value0
+        print(enlarge_value)
+    img,landmarks = rection(imgS)
+    imgS = eye_deformation(landmarks,imgS,num,enlarge_value)
+    Renew(imgS)
+#except:
+    print('請選擇照片')
+        
+def get_value0(event,num):
+    global enlarge_value0
+    print(eyescale1.get())
+    if(num==1):
+        enlarge_value0 = eyescale1.get()
+    elif(num==2):
+        enlarge_value0 = eyescale2.get()
+    elif(num==3):
+        enlarge_value0 = eyescale3.get()
+    elif(num==4):
+        enlarge_value0 = facescale1.get()
 
 
-global imgS,img_show,panel
+
+global imgS,img_show,panel,enlarge_value0,new_img
 
    
 window = tk.Tk()
@@ -120,18 +148,19 @@ font = ('Courier New', 20, 'bold')
 eyescale1 = tk.Scale(
     block2, label='大小', from_=-10, to=10, orient="horizontal"
     ,tickinterval=5,length=280)
+eyescale1.bind('<Button-1>', lambda event: get_value0(event, 1)) 
 eyescale1.bind('<ButtonRelease-1>', lambda event: get_value(event, 1)) 
 
 eyescale2 = tk.Scale(
     block2, label='眼糕', from_=-10, to=10, orient="horizontal"
     ,tickinterval=5,length=280)
+eyescale2.bind('<Button-1>', lambda event: get_value0(event, 2))
 eyescale2.bind('<ButtonRelease-1>', lambda event: get_value(event, 2)) 
 
 eyescale3 = tk.Scale(
     block2, label='眼距', from_=-10, to=10, orient="horizontal"
     ,tickinterval=5,length=280)
-#eyescale3.bind("<ButtonRelease-1>", lambda: get_valueE3(3))
-#eyescale3.bind('<ButtonRelease-1>', get_valueE3(event_args, num=3))  # 右键双击
+eyescale3.bind('<Button-1>', lambda event: get_value0(event, 3))
 eyescale3.bind('<ButtonRelease-1>', lambda event: get_value(event, 3)) 
 
 eyelabel.grid(row=0, column=0)
@@ -166,13 +195,14 @@ facescale1 = tk.Scale(
 
 facelabel.grid(row=0, column=0)
 facescale1.grid(row=1, column=0)
+facescale1.bind('<Button-1>', lambda event: get_value0(event, 4)) 
 facescale1.bind('<ButtonRelease-1>', lambda event: get_value(event, 4)) 
 
 #開檔&存檔
 import_btn = tk.Button(blocktop, text='開啟檔案', bg='#BBFFEE', fg='black',height = 1, 
           width = 20, command=open_file)
 save_btn = tk.Button(blocktop, text="儲存檔案", bg='#BBFFEE', fg='black',height = 1, 
-          width = 20)
+          width = 20, command=save_file)
 import_btn.grid(column=0, row=0, padx=pad0, pady=pad0, sticky=align_mode)
 save_btn.grid(column=1, row=0, padx=pad0, pady=pad0, sticky=align_mode)
 
