@@ -39,10 +39,8 @@ def open_file():
 def save_file():
     global new_img,img_show
     file = filedialog.asksaveasfile(mode='w', defaultextension=".png", filetypes=(("PNG file", "*.png"),("All Files", "*.*") ))
-    if file:
-        abs_path = os.path.abspath(file.name)
-        out = Image.alpha_composite(img_show, txt)
-        out.save(abs_path)
+    cv2.imwrite(file.name,imgS)
+
     
 
 def Renew(im):

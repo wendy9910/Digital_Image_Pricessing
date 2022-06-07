@@ -42,7 +42,7 @@ def eye_deformation(landmarks,img,state,enlarge_value):
         faceDispts2 = Face_deformation_pos(faceDispts1,facePosCenter,enlarge_value)  
         
         
-    if(state==3):
+    if(s2tate==3):
         eyeDispts2 = faceDispts1.copy()
         eyeDispts2 = np.append(eyeDispts2,Leyepts2,axis=0)
         eyeDispts2 = np.append(eyeDispts2,Reyepts2,axis=0)
