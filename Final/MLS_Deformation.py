@@ -3,11 +3,14 @@ import cv2
 
 def eye_deformation(landmarks,img,state,enlarge_value):
     
-    global Leyepts2,Reyepts2,eyeDispts2,LReyePos2,LReyePos1
+    global Leyepts2,Reyepts2,eyeDispts2,LReyePos2,LReyePos1,Mouth_pts2,Mouse_Dist_pts2,Mouth_pos2,nosepts2
     
     LeyePosCenter = np.uint32([(landmarks[36,0]+landmarks[39,0])/2,(landmarks[36,1]+landmarks[39,1])/2])
     ReyePosCenter = np.uint32([(landmarks[42,0]+landmarks[45,0])/2,(landmarks[42,1]+landmarks[45,1])/2])
     facePosCenter = np.uint32([landmarks[30,0]+landmarks[30,1]])
+    MouthPosCenter = np.uint32([(landmarks[48,0]+landmarks[54,0])/2,(landmarks[48,1]+landmarks[54,1])/2])
+    noseCenter = np.uint32([(landmarks[29,0]+landmarks[30,0])/2,(landmarks[29,1]+landmarks[30,1])/2])
+    noseCenter2 = np.uint32([(landmarks[33,0]+landmarks[33,0])/2,(landmarks[33,1]+landmarks[33,1])/2])
     
     Leyepts1 = np.uint32([[landmarks[36,0],landmarks[36,1]],[landmarks[37,0],landmarks[37,1]]
                        ,[landmarks[38,0],landmarks[38,1]],[landmarks[39,0],landmarks[39,1]]
@@ -24,10 +27,23 @@ def eye_deformation(landmarks,img,state,enlarge_value):
                         ,[landmarks[10,0],landmarks[10,1]],[landmarks[12,0],landmarks[12,1]]
                         ,[landmarks[16,0],landmarks[16,1]]])
     
+    Mouth_pts1 = np.uint32([[landmarks[48,0],landmarks[48,1]],[landmarks[49,0],landmarks[49,1]]
+                       ,[landmarks[50,0],landmarks[50,1]],[landmarks[51,0],landmarks[51,1]]
+                       ,[landmarks[52,0],landmarks[52,1]],[landmarks[53,0],landmarks[53,1]]
+                       ,[landmarks[54,0],landmarks[54,1]],[landmarks[55,0],landmarks[55,1]]
+                       ,[landmarks[56,0],landmarks[56,1]],[landmarks[57,0],landmarks[57,1]]
+                       ,[landmarks[58,0],landmarks[58,1]],[landmarks[59,0],landmarks[59,1]]
+                       ,[(landmarks[48,0]+landmarks[54,0])/2,(landmarks[48,1]+landmarks[54,1])/2]])
+    
+    nosepts1= np.uint32([[landmarks[28,0],landmarks[28,1]],[landmarks[31,0],landmarks[31,1]]
+                       ,[landmarks[32,0],landmarks[32,1]],[landmarks[33,0],landmarks[33,1]]
+                       ,[landmarks[34,0],landmarks[34,1]],[landmarks[35,0],landmarks[35,1]]
+                       ,[(landmarks[29,0]+landmarks[30,0])/2,(landmarks[29,1]+landmarks[30,1])/2]])
+    
     eyeDispts1 = faceDispts1.copy()
     eyeDispts1 = np.append(eyeDispts1,Leyepts1,axis=0)
     eyeDispts1 = np.append(eyeDispts1,Reyepts1,axis=0)
-    
+        
     
     if(state==1):
         Leyepts2 = eye_deformation_enlarge_Pos(Leyepts1,LeyePosCenter,enlarge_value)    
@@ -39,10 +55,16 @@ def eye_deformation(landmarks,img,state,enlarge_value):
         Leyepts2 = eye_deformation_distance_Pos(Leyepts1,-1,enlarge_value)  
         Reyepts2 = eye_deformation_distance_Pos(Reyepts1,1,enlarge_value)
     elif(state==4):
-        faceDispts2 = Face_deformation_pos(faceDispts1,facePosCenter,enlarge_value)  
+        faceDispts2 = Face_deformation_pos(faceDispts1,facePosCenter,enlarge_value)
+    elif(state==5):
+        nosepts2 = nose_deformation_enlarge_Pos(nosepts1,noseCenter,enlarge_value)
+    elif(state==6):
+        nosepts2 = nose_deformation_Pos(nosepts1,noseCenter2,enlarge_value)
+    elif(state==7):
+        Mouth_pts2 = eye_deformation_enlarge_Pos(Mouth_pts1,LeyePosCenter,enlarge_value) 
         
         
-    if(s2tate==3):
+    if(state==3):
         eyeDispts2 = faceDispts1.copy()
         eyeDispts2 = np.append(eyeDispts2,Leyepts2,axis=0)
         eyeDispts2 = np.append(eyeDispts2,Reyepts2,axis=0)
@@ -51,23 +73,21 @@ def eye_deformation(landmarks,img,state,enlarge_value):
     elif(state==4):
         initial = trans(img, faceDispts1)
         img3 = initial.deformation(img, faceDispts2)
+    elif(state==6 or state==5):
+        initial = trans(img, nosepts1)
+        img3 = initial.deformation(img, nosepts2)
+    elif(state==7):
+        initial = trans(img, Mouth_pts1)
+        img3 = initial.deformation(img, Mouth_pts2)
+    elif(state==8):
+        img3 = colorChange(landmarks,img,enlarge_value)
     else:
         LReyePos1 = Leyepts1.copy()
         LReyePos1 = np.append(LReyePos1,Reyepts1,axis=0)
         LReyePos2 = Leyepts2.copy()
         LReyePos2 = np.append(LReyePos2,Reyepts2,axis=0)
         initial = trans(img, LReyePos1)
-        img3 = initial.deformation(img, LReyePos2)
-
-      
-#     Leyepts = tuple(map(tuple, Leyepts2))
-#     Reyepts = tuple(map(tuple, Reyepts2))
-#     eyeDispts = tuple(map(tuple, eyeDispts2))
-    
-#     for pos in eyeDispts:
-#         cv2.circle(img3, pos, 5, color=(0, 0, 255),thickness = -1)  
-
-    
+        img3 = initial.deformation(img, LReyePos2)    
 
     return img3
 
@@ -135,6 +155,42 @@ def Face_deformation_pos(pos1,c,enlarge_value):
             pos = np.uint32([pos1[idx]])
             p1 = np.append(p1,pos,axis=0)
         p1 = np.uint32(p1)
+    return p1
+
+def nose_deformation_enlarge_Pos(pos1,c,enlarge_value):
+    print(c)
+    a = np.empty(shape=(0, 2))
+    #位移方向
+    for idx, point in enumerate(pos1):
+        vec1 = np.int32([pos1[idx]-c])
+        a = np.append(a,vec1,axis=0)
+    dic = normalization(a)
+    #加移動向量
+    p1 = np.empty(shape=(0, 2))
+    for idx, point in enumerate(pos1):
+        pos = np.uint32([pos1[idx]+dic[idx]*enlarge_value])
+        p1 = np.append(p1,pos,axis=0)
+    p1 = np.uint32(p1)
+    return p1
+    
+
+def nose_deformation_Pos(pos1,c,enlarge_value):
+    print(c)
+    a = np.empty(shape=(0, 2))
+    #位移方向
+    for idx, point in enumerate(pos1):
+        vec1 = np.int32([pos1[idx]-c])
+        a = np.append(a,vec1,axis=0)
+    dic = normalization(a)
+    #加移動向量
+    p1 = np.empty(shape=(0, 2))
+    for idx, point in enumerate(pos1):
+        if(idx!=0 or idx!=5):
+            pos = np.uint32([pos1[idx]+dic[idx]*enlarge_value])
+            p1 = np.append(p1,pos,axis=0)
+        else:
+            pos = np.uint32([pos1[idx]])
+    p1 = np.uint32(p1)
     return p1
 
 #規一化後的範圍是[-1, 1]
@@ -243,3 +299,35 @@ def compute_G(img_coordinate, pi, height, width, thre = 0.9):
     # cita = 1
 
     return cita
+
+def createBox(img,points,scale=5,masked=False,cropped = True): #遮罩(嘴唇變顏色)
+    if masked:
+        mask = np.zeros_like(img)
+        mask = cv2.fillPoly(mask,[points],(255,255,255))
+        img = cv2.bitwise_and(img,mask)
+        # cv2.imshow('Mask',img)
+ 
+ 
+    if cropped:
+        bbox = cv2.boundingRect(points)
+        x,y,w,h = bbox
+        imgCrop = img[y:y+h,x:x+w]
+        imgCrop = cv2.resize(imgCrop,(0,0),None,scale,scale)
+        return imgCrop
+    else:
+        return mask
+    
+def colorChange(landmarks,img,enlarge_value):
+    b=g=0
+    r=enlarge_value
+    imgLips = createBox(img,landmarks[48:61],8,masked=True,cropped=False)
+    imgColorLips = np.zeros_like(imgLips)
+    imgColorLips[:] = b,g,r
+    imgColorLips = cv2.bitwise_and(imgLips,imgColorLips)
+    imgColorLips = cv2.GaussianBlur(imgColorLips,(7,7),10)
+    imgColorLips = cv2.addWeighted(img,1,imgColorLips,0.4,0)
+    cv2.imshow("new",imgColorLips)
+    
+    return imgColorLips
+    
+    

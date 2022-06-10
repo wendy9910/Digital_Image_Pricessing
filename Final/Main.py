@@ -12,6 +12,15 @@ from MLS_Deformation import *
 # (對68個點要變動的程式碼，每對imgS做變動，都要呼叫Renew()函式更新)
 
 
+def setting_scale():
+    eyescale1.set(0) 
+    eyescale2.set(0) 
+    eyescale3.set(0) 
+    facescale1.set(0) 
+    nosescale1.set(0) 
+    nosescale2.set(0) 
+    mouthscale1.set(0) 
+    mouthscale2.set(0) 
 
 def OpenCV_small():  # opencv 等比縮小圖片
     global imgS    
@@ -25,10 +34,12 @@ def OpenCV_small():  # opencv 等比縮小圖片
         nc2 = int(nc * scale)
         imgS = cv2.resize(imgS,(nc2,nr2),interpolation = cv2.INTER_LINEAR)
 
+
 def open_file():
-    global panel,imgS,img_show
+    global panel,imgS,img_show,imgO
     filename=filedialog.askopenfilename()  #獲取文件全路徑
-    imgS = cv2.imread(filename) # 用opencv的方法    
+    imgS = cv2.imread(filename) # 用opencv的方法   
+    imgO = imgS.copy()
     OpenCV_small() # opencv 等比縮小圖片
     
     # Label改成Canvas，不要用Label因為會有覆寫問題
@@ -36,8 +47,10 @@ def open_file():
     imgS,landmarks = rection(imgS)  # imgS是rection後的opencv圖    
     Renew(imgS) # 更新
     
+    setting_scale()
+    
 def save_file():
-    global new_img,img_show
+    global new_img,img_show,imgS
     file = filedialog.asksaveasfile(mode='w', defaultextension=".png", filetypes=(("PNG file", "*.png"),("All Files", "*.*") ))
     cv2.imwrite(file.name,imgS)
 
@@ -77,7 +90,7 @@ global enlarge_value0
     
 def get_value(event,num):
     global enlarge_value,imgS,enlarge_value0
-#try:
+    #try:
     if(num==1):
         enlarge_value = eyescale1.get() - enlarge_value0
         print(enlarge_value)
@@ -90,15 +103,27 @@ def get_value(event,num):
     elif(num==4):
         enlarge_value = facescale1.get() - enlarge_value0
         print(enlarge_value)
+    elif(num==5):
+        enlarge_value = nosescale1.get() - enlarge_value0
+        print(enlarge_value)
+    elif(num==6):
+        enlarge_value = nosescale2.get() - enlarge_value0
+        print(enlarge_value)
+    elif(num==7):
+        enlarge_value = mouthscale1.get() - enlarge_value0
+        print(enlarge_value)
+    elif(num==8):
+        enlarge_value = mouthscale2.get()
+        print(enlarge_value)
     img,landmarks = rection(imgS)
     imgS = eye_deformation(landmarks,imgS,num,enlarge_value)
+    #imgN = eye_deformation(landmarks,imgS,num,enlarge_value)
     Renew(imgS)
-#except:
-    print('請選擇照片')
+    #except:
+        #print('請選擇照片')
         
 def get_value0(event,num):
     global enlarge_value0
-    print(eyescale1.get())
     if(num==1):
         enlarge_value0 = eyescale1.get()
     elif(num==2):
@@ -107,10 +132,19 @@ def get_value0(event,num):
         enlarge_value0 = eyescale3.get()
     elif(num==4):
         enlarge_value0 = facescale1.get()
+    elif(num==5):
+        enlarge_value0 = nosescale1.get()
+    elif(num==6):
+        enlarge_value0 = nosescale2.get()
+    elif(num==7):
+        enlarge_value0 = mouthscale1.get()
+    elif(num==8):
+        enlarge_value0 = mouthscale2.get()
+        
 
 
 
-global imgS,img_show,panel,enlarge_value0,new_img
+global imgS,img_show,panel,enlarge_value0,new_img,imgO
 
    
 window = tk.Tk()
@@ -150,7 +184,7 @@ eyescale1.bind('<Button-1>', lambda event: get_value0(event, 1))
 eyescale1.bind('<ButtonRelease-1>', lambda event: get_value(event, 1)) 
 
 eyescale2 = tk.Scale(
-    block2, label='眼糕', from_=-10, to=10, orient="horizontal"
+    block2, label='眼高', from_=-10, to=10, orient="horizontal"
     ,tickinterval=5,length=280)
 eyescale2.bind('<Button-1>', lambda event: get_value0(event, 2))
 eyescale2.bind('<ButtonRelease-1>', lambda event: get_value(event, 2)) 
@@ -168,23 +202,36 @@ eyescale3.grid(row=3, column=0)
 
 noselabel = tk.Label(block3,text="鼻子",font=('新細明體', 12),padx=pad, pady=pad,fg='#007799')
 nosescale1 = tk.Scale(
-    block3, label='大小', from_=0, to=100, orient="horizontal",tickinterval=10,length=280)
+    block3, label='大小', from_=-8, to=8, orient="horizontal",tickinterval=4,length=280)
 nosescale2 = tk.Scale(
-    block3, label='鼻翼', from_=0, to=100, orient="horizontal",tickinterval=10,length=280)
+    block3, label='鼻翼', from_=-20, to=20, orient="horizontal",tickinterval=5,length=280)
+nosescale1.bind('<Button-1>', lambda event: get_value0(event, 5))
+nosescale1.bind('<ButtonRelease-1>', lambda event: get_value(event, 5)) 
+
+nosescale2.bind('<Button-1>', lambda event: get_value0(event, 6))
+nosescale2.bind('<ButtonRelease-1>', lambda event: get_value(event, 6)) 
+
 
 noselabel.grid(row=0, column=0)
 nosescale1.grid(row=1, column=0)
 nosescale2.grid(row=2, column=0)
 
-mouselabel = tk.Label(block4,text="嘴巴",font=('新細明體', 12),padx=pad, pady=pad,fg='#007799')
-mousescale1 = tk.Scale(
-    block4, label='大小', from_=0, to=100, orient="horizontal",tickinterval=10,length=280)
-mousescale2 = tk.Scale(
-    block4, label='薄厚', from_=0, to=100, orient="horizontal",tickinterval=10,length=280)
+mouthlabel = tk.Label(block4,text="嘴巴",font=('新細明體', 12),padx=pad, pady=pad,fg='#007799')
+mouthscale1 = tk.Scale(
+    block4, label='大小', from_=-10, to=10, orient="horizontal",tickinterval=5,length=280)
+mouthscale2 = tk.Scale(
+    block4, label='薄厚', from_=0, to=255, orient="horizontal",tickinterval=50,length=280)
 
-mouselabel.grid(row=0, column=0)
-mousescale1.grid(row=1, column=0)
-mousescale2.grid(row=2, column=0)
+mouthscale1.bind('<Button-1>', lambda event: get_value0(event, 7))
+mouthscale1.bind('<ButtonRelease-1>', lambda event: get_value(event, 7)) 
+
+mouthscale2.bind('<Button-1>', lambda event: get_value0(event, 8))
+mouthscale2.bind('<ButtonRelease-1>', lambda event: get_value(event, 8)) 
+
+
+mouthlabel.grid(row=0, column=0)
+mouthscale1.grid(row=1, column=0)
+mouthscale2.grid(row=2, column=0)
 
 facelabel = tk.Label(block5,text="臉型",font=('新細明體', 12),padx=pad, pady=pad,fg='#007799')
 font = ('Courier New', 20, 'bold')
