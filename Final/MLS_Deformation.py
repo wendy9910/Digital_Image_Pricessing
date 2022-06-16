@@ -1,7 +1,7 @@
 import numpy as np
 import cv2     
 
-def eye_deformation(landmarks,img,state,enlarge_value):
+def eye_deformation(landmarks,img,state,enlarge_value,img4):
     
     global Leyepts2,Reyepts2,eyeDispts2,LReyePos2,LReyePos1,Mouth_pts2,Mouse_Dist_pts2,Mouth_pos2,nosepts2
     
@@ -70,26 +70,33 @@ def eye_deformation(landmarks,img,state,enlarge_value):
         eyeDispts2 = np.append(eyeDispts2,Reyepts2,axis=0)
         initial = trans(img, eyeDispts1)
         img3 = initial.deformation(img, eyeDispts2)
+        img4 = initial.deformation(img4, eyeDispts2)
     elif(state==4):
         initial = trans(img, faceDispts1)
-        img3 = initial.deformation(img, faceDispts2)
+        img3 = initial.deformation(img, faceDispts2) 
+        img4 = initial.deformation(img4, faceDispts2)
     elif(state==6 or state==5):
         initial = trans(img, nosepts1)
         img3 = initial.deformation(img, nosepts2)
+        img4 = initial.deformation(img4, nosepts2)
     elif(state==7):
         initial = trans(img, Mouth_pts1)
         img3 = initial.deformation(img, Mouth_pts2)
+        img4 = initial.deformation(img4, Mouth_pts2)
     elif(state==8):
-        img3 = colorChange(landmarks,img,enlarge_value)
+        img3 = img4.copy()
+        img3 = colorChange(landmarks,img3,enlarge_value)        
     else:
         LReyePos1 = Leyepts1.copy()
         LReyePos1 = np.append(LReyePos1,Reyepts1,axis=0)
         LReyePos2 = Leyepts2.copy()
         LReyePos2 = np.append(LReyePos2,Reyepts2,axis=0)
         initial = trans(img, LReyePos1)
-        img3 = initial.deformation(img, LReyePos2)    
+        img3 = initial.deformation(img, LReyePos2) 
+        img4 = initial.deformation(img, LReyePos2)    
 
-    return img3
+
+    return img3,img4
 
 #調整頂點位置放大縮小
 
@@ -326,7 +333,6 @@ def colorChange(landmarks,img,enlarge_value):
     imgColorLips = cv2.bitwise_and(imgLips,imgColorLips)
     imgColorLips = cv2.GaussianBlur(imgColorLips,(7,7),10)
     imgColorLips = cv2.addWeighted(img,1,imgColorLips,0.4,0)
-    cv2.imshow("new",imgColorLips)
     
     return imgColorLips
     

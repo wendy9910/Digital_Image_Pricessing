@@ -36,10 +36,10 @@ def OpenCV_small():  # opencv 等比縮小圖片
 
 
 def open_file():
-    global panel,imgS,img_show,imgO
+    global panel,imgS,img_show,imgO,imgN
     filename=filedialog.askopenfilename()  #獲取文件全路徑
     imgS = cv2.imread(filename) # 用opencv的方法   
-    imgO = imgS.copy()
+    imgN = imgS.copy()
     OpenCV_small() # opencv 等比縮小圖片
     
     # Label改成Canvas，不要用Label因為會有覆寫問題
@@ -89,7 +89,7 @@ def rection(img): # OpenCV 測68個點
 global enlarge_value0
     
 def get_value(event,num):
-    global enlarge_value,imgS,enlarge_value0
+    global enlarge_value,imgS,enlarge_value0,imgN
     #try:
     if(num==1):
         enlarge_value = eyescale1.get() - enlarge_value0
@@ -116,7 +116,7 @@ def get_value(event,num):
         enlarge_value = mouthscale2.get()
         print(enlarge_value)
     img,landmarks = rection(imgS)
-    imgS = eye_deformation(landmarks,imgS,num,enlarge_value)
+    imgS,imgN = eye_deformation(landmarks,imgS,num,enlarge_value,imgN)
     #imgN = eye_deformation(landmarks,imgS,num,enlarge_value)
     Renew(imgS)
     #except:
@@ -144,7 +144,7 @@ def get_value0(event,num):
 
 
 
-global imgS,img_show,panel,enlarge_value0,new_img,imgO
+global imgS,img_show,panel,enlarge_value0,new_img,imgO,imgN
 
    
 window = tk.Tk()
@@ -220,7 +220,7 @@ mouthlabel = tk.Label(block4,text="嘴巴",font=('新細明體', 12),padx=pad, p
 mouthscale1 = tk.Scale(
     block4, label='大小', from_=-10, to=10, orient="horizontal",tickinterval=5,length=280)
 mouthscale2 = tk.Scale(
-    block4, label='薄厚', from_=0, to=255, orient="horizontal",tickinterval=50,length=280)
+    block4, label='顏色', from_=0, to=255, orient="horizontal",tickinterval=50,length=280)
 
 mouthscale1.bind('<Button-1>', lambda event: get_value0(event, 7))
 mouthscale1.bind('<ButtonRelease-1>', lambda event: get_value(event, 7)) 
